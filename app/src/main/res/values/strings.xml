@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Truck list</string>
+    <string name="retry">Retry</string>
+    <string name="comment">Comments</string>
+    <string name="ruble">₽</string>
+    <string name="truck_error">An error occurred while loading the trucks</string>
+    <string name="server_error">Something wrong! Try later!</string>
+    <string name="adding_complete">Truck adding complete</string>
+    <string name="changing_complete">Truck changing complete</string>
+    <string name="create_new_truck">Create new truck</string>
+    <string name="change_truck">Change current truck</string>
+    <string name="truck_name">Truck name</string>
+    <string name="truck_price">Truck price</string>
+    <string name="truck_comment">Truck comment</string>
+    <string name="save_truck">Save truck</string>
+    <string name="unknown_truck">Unknown truck</string>
+    <string name="unknown_price">Unknown price</string>
+    <string name="unknown_comment">Unknown comment</string>
+</resources>
