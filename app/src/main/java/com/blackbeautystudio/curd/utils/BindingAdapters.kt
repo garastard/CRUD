@@ -6,6 +6,7 @@ import android.databinding.BindingAdapter
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.RecyclerView
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.SimpleItemAnimator
 import android.view.View
 
 @BindingAdapter("adapter")

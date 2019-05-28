@@ -17,11 +17,28 @@
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:visibility="@{viewModel.loadingVisibility}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:mutableVisibility="@{viewModel.loadingVisibility}" />
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/internet_unavailable"
+            android:textAlignment="center"
+            android:textColor="#F7EC1C1C"
+            android:textSize="22sp"
+            android:visibility="@{viewModel.internetErrorVisibility}"
+            app:layout_constraintBottom_toBottomOf="@+id/swipeContainer"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/swipeContainer" />
 
         <android.support.v4.widget.SwipeRefreshLayout
             android:id="@+id/swipeContainer"
@@ -39,6 +56,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@color/list_background"
+                android:visibility="@{viewModel.truckListVisibility}"
                 app:adapter="@{viewModel.truckListAdapter}" />
         </android.support.v4.widget.SwipeRefreshLayout>
 

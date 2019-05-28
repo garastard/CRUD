@@ -1,7 +1,6 @@
 package com.blackbeautystudio.curd.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import com.blackbeautystudio.curd.App
 import com.blackbeautystudio.curd.R
@@ -11,6 +10,8 @@ import com.blackbeautystudio.curd.utils.getString
 import com.blackbeautystudio.curd.utils.shortSubscription
 import com.blackbeautystudio.curd.utils.showLongToast
 import com.blackbeautystudio.curd.utils.showShortToast
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 
 class ChangeTruckViewModel(arguments: Bundle) : EditTruckViewModel() {
 
@@ -19,6 +20,8 @@ class ChangeTruckViewModel(arguments: Bundle) : EditTruckViewModel() {
     override val onClickListener = View.OnClickListener {
         mTruck?.id?.let { truckId ->
             truckApi.editTruck(truckId, Truck(null, nameText.get(), priceText.get(), commentText.get()))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .shortSubscription({
                         App.appComponent.event().onNext(NavEvent(NavEvent.Destination.ONE))
                         R.string.changing_complete.getString().showShortToast()

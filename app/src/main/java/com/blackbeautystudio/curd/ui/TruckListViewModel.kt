@@ -1,10 +1,11 @@
 package com.blackbeautystudio.curd.ui
 
-import android.arch.lifecycle.MutableLiveData
-import android.databinding.ObservableBoolean
 import android.databinding.ObservableField
+import android.databinding.ObservableInt
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import com.blackbeautystudio.curd.App
 import com.blackbeautystudio.curd.R
 import com.blackbeautystudio.curd.base.BaseViewModel
@@ -17,14 +18,18 @@ import io.reactivex.ObservableEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class TruckListViewModel : BaseViewModel() {
     @Inject
     lateinit var truckApi: TruckApi
     private val mEventObservable by lazy { App.appComponent.event() }
-    val truckListAdapter: TruckListAdapter = TruckListAdapter().apply { setHasStableIds(true) }
-    val loadingVisibility: MutableLiveData<Int> = MutableLiveData()
+    private val mInternetStateObservable by lazy { App.appComponent.internetState() }
+    val truckListAdapter: TruckListAdapter = TruckListAdapter()
+    val loadingVisibility = ObservableInt(GONE)
+    val internetErrorVisibility = ObservableInt(GONE)
+    val truckListVisibility = ObservableInt(VISIBLE)
 
     val onClickListener: View.OnClickListener = View.OnClickListener {
         mEventObservable.onNext(NavEvent(NavEvent.Destination.TWO))
@@ -51,12 +56,25 @@ class TruckListViewModel : BaseViewModel() {
                 truckApi.deleteTruck(it.truckId).doOnNext { load() }.execute()
             }
         }
+        mInternetStateObservable.shortSubscription({ if (!it.available()) internetConnectionUnavailable() })
         mTruckListDisposable = mLoadObservable
+                .throttleLast(100L, TimeUnit.MILLISECONDS)
+                .flatMap { mInternetStateObservable }
+                .filter { it.available() }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext {
+                    internetConnectionAvailable()
+                    loadingVisibility.set(VISIBLE)
+                }
                 .flatMap { truckApi.getTruckList() }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe { loadingVisibility.value = View.VISIBLE }
-                .doOnTerminate { loadingVisibility.value = View.GONE }
+                .doOnTerminate {
+                    loadingVisibility.set(GONE)
+                    loadingVisibility.notifyChange()
+                }
+                .map { it.filter { !it.comment.isNullOrBlank() && !it.price.isNullOrBlank() && !it.nameTruck.isNullOrBlank() } }
                 .shortSubscription(
                         { truckListAdapter.updateTruckList(it) },
                         { R.string.truck_error.getString().showLongToast() }
@@ -67,6 +85,21 @@ class TruckListViewModel : BaseViewModel() {
         super.onCleared()
         mEventSubscription?.dispose()
         mTruckListDisposable?.dispose()
+    }
+
+    private fun internetConnectionAvailable() {
+        internetErrorVisibility.set(GONE)
+        truckListVisibility.set(VISIBLE)
+    }
+
+    private fun internetConnectionUnavailable() {
+        R.string.internet_unavailable.getString().showShortToast()
+        internetErrorVisibility.set(VISIBLE)
+        internetErrorVisibility.notifyChange()
+        loadingVisibility.set(GONE)
+        loadingVisibility.notifyChange()
+        truckListVisibility.set(GONE)
+        truckListVisibility.notifyChange()
     }
 
     fun load() {
